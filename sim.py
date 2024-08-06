@@ -12,10 +12,10 @@ DIRECTIONS = {
 
 FACINGS = ['N', 'E', 'S', 'W']
 VALID_COMMANDS = [
-    'F', # Move forward
-    'R', # Turn right
-    'L', # Turn left
-    'X', # Self-destruct
+    'N', # Move north
+    'E', # Move east
+    'W', # Move west
+    'S', # Move south
     'U' # Teleport/Open Door/Touch Goal
 ]
 
@@ -70,17 +70,11 @@ def run_sim(
         )
         write_to_log(
             log,
-            f"   Start:    {agent_x},{agent_y}   Facing: {agent_facing}"
+            f"   Start:    {agent_x},{agent_y}"
         )
         percept_str = ""
-        i = 0
-        for k,v in percepts.items():
-            percept_str += f"{k} "
-            for p in v:
-                percept_str += f"{p} "
-            if i < len(percepts)-1:
-                percept_str += "\n             "
-            i+=1
+        for k, v in percepts.items():
+            percept_str += f"({k} {v}) "
         write_to_log(
             log,
             f"   Percepts: {percept_str}"
@@ -98,27 +92,14 @@ def run_sim(
             new_agent_y = agent_y
 
             match agent_cmd:
-                case 'F':
-                    dx, dy = DIRECTIONS[agent_facing]
+                case 'N' | 'E' | 'S' | 'W':
+                    dx, dy = DIRECTIONS[agent_cmd]
                     new_agent_x = agent_x + dx
                     new_agent_y = agent_y + dy
                     if the_world.is_cell_enterable(new_agent_x, new_agent_y):
                         agent_x = new_agent_x
                         agent_y = new_agent_y
-                case 'R':
-                    agent_facing = turn_right(agent_facing)
-                case 'L':
-                    agent_facing = turn_left(agent_facing)
-                case 'X':
-                    write_to_log(
-                        log,
-                        f"FAILURE: Your agent triggered its self-destruct."
-                    )
-                    run = False
-                    continue
 
-            # if (new_agent_x != agent_x or new_agent_y != agent_y) and \
-            #     the_world.is_cell_enterable(new_agent_x, new_agent_y):
                 
             trigger = the_world.check_triggers(agent_x, agent_y, agent_cmd)
             match trigger[0]:
@@ -163,7 +144,7 @@ def run_sim(
 
             write_to_log(
                 log,
-                f"   End:      {agent_x},{agent_y}   Facing: {agent_facing}"
+                f"   End:      {agent_x},{agent_y}"
             )
 
             if max_turns is not None:
@@ -176,6 +157,7 @@ def run_sim(
 
         else:
             write_to_log(log, f"Invalid command: {agent_cmd}")
+            write_to_log(log, "FAILURE")
             run = False
 
         if use_display:
@@ -190,16 +172,23 @@ def run_sim(
         disp.quit()
 
 def get_percepts(the_world, agent_x, agent_y, agent_facing):
-    percepts = {}
-    percepts["X"] = [the_world.get_cell(agent_x, agent_y)]
-    dx, dy = DIRECTIONS[agent_facing]
-    ray = the_world.raycast(
-        agent_x,
-        agent_y,
-        dx, dy
-    )
-    ray = the_world.prune_raycast(ray)
-    percepts["F"] = ray
+    # percepts = the_world.get_cells_around(agent_x, agent_y)
+    percepts = {'X':[the_world.get_cell(agent_x, agent_y)]}
+    for d, v in DIRECTIONS.items():
+        dx, dy = v
+        ray = the_world.raycast(agent_x, agent_y, dx, dy)
+        ray = the_world.prune_raycast(ray)
+        percepts[d] = ray
+
+    # percepts = [the_world.get_cell(agent_x, agent_y)]
+    # dx, dy = DIRECTIONS[agent_facing]
+    # ray = the_world.raycast(
+    #     agent_x,
+    #     agent_y,
+    #     dx, dy
+    # )
+    # ray = the_world.prune_raycast(ray)
+    # percepts += ray
     return percepts
 
 

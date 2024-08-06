@@ -124,6 +124,19 @@ class World:
         else:
             return False
 
+    def get_cells_around(self, x, y):
+        cells = {}
+        cells['N'] = self.get_cell(x, y-1)
+        cells['NE'] = self.get_cell(x+1, y-1)
+        cells['E'] = self.get_cell(x+1, y)
+        cells['SE'] = self.get_cell(x+1, y+1)
+        cells['S'] = self.get_cell(x, y+1)
+        cells['SW'] = self.get_cell(x-1, y+1)
+        cells['W'] = self.get_cell(x-1, y)
+        cells['NW'] = self.get_cell(x-1, y-1)
+        cells['X'] = self.get_cell(x, y)
+        return cells
+
     def raycast(self, x, y, dx, dy):
         cells = []
         nx = x+dx
