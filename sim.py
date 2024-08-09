@@ -19,6 +19,8 @@ VALID_COMMANDS = [
     'U' # Teleport/Open Door/Touch Goal
 ]
 
+POINTS_PER_GOAL = 100
+
 def run_sim(
     the_world, 
     max_turns=None, 
@@ -35,6 +37,8 @@ def run_sim(
     turn = 1
     agent_cmd = "X"
     percepts = {}
+    ai_state = 'GOOD'
+    points = 1000
 
     disp = None
 
@@ -56,6 +60,23 @@ def run_sim(
 
     run = True
     while run:
+
+        if ai_state != 'GOOD':
+            run = False
+            write_to_log(
+                log,
+                f"-----Scenario Finished-----"
+            )
+            write_to_log(
+                log,
+                f"FINAL AGENT STATE: {ai_state}"
+            )
+            continue
+        else:
+            write_to_log(
+                log,
+                f"-----Turn {turn}-----"
+            )
 
         # What does the agent see?
         percepts = get_percepts(the_world, agent_x, agent_y, agent_facing)
@@ -103,12 +124,12 @@ def run_sim(
                 
             trigger = the_world.check_triggers(agent_x, agent_y, agent_cmd)
             match trigger[0]:
-                case "DIE":
+                case "EXIT":
                     write_to_log(
                         log,
-                        f"   Trigger:  Agent has been destroyed. FAILURE"
+                        f"   Trigger:  Agent has exited the environment."
                     )
-                    run = False
+                    ai_state = 'EXITED'
                 case "TELEPORT":
                     write_to_log(
                         log,
@@ -123,21 +144,22 @@ def run_sim(
                         f"   Trigger:  Doors opened."
                     )
                 case "GOAL_TRIGGERED":
-                    if trigger[1] == 0:
-                        write_to_log(
-                            log,
-                            f"   Trigger:  Goal {trigger[2]}"
-                        )
-                        write_to_log(
-                            log,
-                            f"   Trigger:  You have completed this map in {turn} turns. SUCCESS"
-                        )
-                        run = False
-                    else:
-                        write_to_log(
-                            log,
-                            f"   Trigger:  Goal {trigger[2]}"
-                        )
+                    # if trigger[1] == 0:
+                    #     write_to_log(
+                    #         log,
+                    #         f"   Trigger:  Goal {trigger[2]}"
+                    #     )
+                    #     write_to_log(
+                    #         log,
+                    #         f"   Trigger:  You have completed this map in {turn} turns. SUCCESS"
+                    #     )
+                    #     run = False
+                    # else:
+                    points += POINTS_PER_GOAL
+                    write_to_log(
+                        log,
+                        f"   Trigger:  Agent activated goal {trigger[2]}"
+                    )
                 case "NONE":
                     pass
 
@@ -147,17 +169,9 @@ def run_sim(
                 f"   End:      {agent_x},{agent_y}"
             )
 
-            if max_turns is not None:
-                if turn >= max_turns:
-                    write_to_log(
-                        log,
-                        f"---MAX TURNS REACHED---"
-                    )
-                    run = False
-
         else:
             write_to_log(log, f"Invalid command: {agent_cmd}")
-            write_to_log(log, "FAILURE")
+            ai_state = 'BAD'
             run = False
 
         if use_display:
@@ -166,7 +180,23 @@ def run_sim(
             )
             time.sleep(display_speed)
 
+
+        if max_turns is not None:
+            if turn >= max_turns:
+                write_to_log(
+                    log,
+                    f"---MAX TURNS REACHED---"
+                )
+                run = False
+                continue
+
+        points -= 1
         turn += 1
+
+    write_to_log(
+        log,
+        f"FINAL SCORE: {points}"
+    )
 
     if use_display:
         disp.quit()

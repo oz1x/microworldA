@@ -11,7 +11,7 @@ class World:
     ]
 
     # Cells that are treated as walls.
-    WALL_CELLS = ['w', 'p']
+    WALL_CELLS = ['w']
 
     # Goal Cells
     GOAL_CELLS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
@@ -172,8 +172,8 @@ class World:
         if self.is_valid_cell(x, y):
             cell = self.get_cell(x, y)
             
-            if cell == "r":
-                return ["DIE"]
+            if cell == "r" and cmd == "U":
+                return ["EXIT"]
             elif cell == "b" and cmd == "U":
                 nxny = self.find_cell("o")
                 if nxny is not None:
@@ -190,12 +190,6 @@ class World:
                 nxny = self.find_cell("y")
                 if nxny is not None:
                     return ["TELEPORT", nxny[0], nxny[1]]
-            # elif cell == "y" and cmd == "U":
-            #     if self.doors_closed:
-            #         self.doors_closed = False
-            #         self.swap_all_cells("p", "g")
-            #         self.swap_all_cells("y", "g")
-            #         return ["DOORS_OPEN"]
             elif cell in World.GOAL_CELLS and cmd == "U":
                 index = self.goals.index(cell)
                 self.swap_all_cells(cell, "g")
