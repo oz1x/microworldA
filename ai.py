@@ -17,7 +17,7 @@ class AI:
         Called once before the sim starts. You may use this function
         to initialize any data or data structures you need.
         """
-        self.turn = -1
+        self.turn = 0
 
     def update(self, percepts):
         """
@@ -43,23 +43,6 @@ class AI:
 
         The same goes for goal hexes (0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
         """
-        self.turn += 1
         
-        match self.turn:
-            case 0 | 1 | 2 | 3 | 4:
-                return 'S'
-            case 5 | 6 | 7:
-                return 'E'
-            case 8 | 9 | 10 | 11 | 12:
-                return 'S'
-            case 13 | 14 | 15:
-                return 'E'
-            case 16 | 17 | 18 | 19:
-                return 'S'
-            case 20:
-                return 'W'
-            case 21:
-                return 'U'
-        
-        #return random.choice(['N', 'S', 'E', 'W'])
+        return random.choice(['N', 'S', 'E', 'W'])
     
