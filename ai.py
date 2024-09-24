@@ -1,4 +1,4 @@
-# NAME(S): [PLACE YOUR NAME(S) HERE]
+# NAME(S): Dylan Andrews, Ozwin Cordes
 #
 # APPROACH: [WRITE AN OVERVIEW OF YOUR APPROACH HERE.]
 #     Please use multiple lines (< ~80-100 char) for you approach write-up.
@@ -12,12 +12,30 @@ import random
 
 
 class AI:
+
+    class TileObj:
+
+        def __init__(self):
+            self.typeOfTile = 'W'
+            self.visited = 0
+
+        def isVisited(self):
+            return self.visited
+        
+    
     def __init__(self):
         """
         Called once before the sim starts. You may use this function
         to initialize any data or data structures you need.
         """
         self.turn = 0
+        self.previousChoice = 'X'
+        self.memory = [[self.TileObj] * 1] * 1
+        self.xPos = 0
+        self.yPos = 0
+        print(self.memory)
+
+    
 
     def update(self, percepts):
         """
@@ -44,5 +62,32 @@ class AI:
         The same goes for goal hexes (0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
         """
         
-        return random.choice(['N', 'S', 'E', 'W'])
+
+        numTiles = {'N': 0, "E": 0, "S": 0, 'W': 0, 'X': 999999}
+        opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
+        for direction in percepts:
+            path = percepts.get(direction)
+            for tile in path:
+                if direction != opposites[self.previousChoice]:
+                    if tile == 'w':
+                        break
+                    if tile != 'w':
+                        numTiles[direction] += 1
+                    if tile == 'r':
+                        choice = direction
+                        return choice
+                    
+        shortest = 999
+        for direction in percepts:
+            print(numTiles[direction])
+            if numTiles[direction] > 0:
+                if numTiles[direction] < shortest:                    
+                    choice = direction
+                    shortest = numTiles[direction]
+
+        if (percepts.get('X') == 'r'):
+            choice = 'U'
+        self.previousChoice = choice
+        print("Picked direction " + choice + " with length " + str(shortest))
+        return choice
     
