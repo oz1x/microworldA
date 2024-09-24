@@ -15,12 +15,15 @@ class AI:
 
     class TileObj:
 
-        def __init__(self):
-            self.typeOfTile = 'W'
+        def __init__(self, tileType='w'):
+            self.typeOfTile = tileType
             self.visited = 0
 
         def isVisited(self):
             return self.visited
+
+        def setVisited(self):
+            self.visited = 1
         
     
     def __init__(self):
@@ -30,10 +33,10 @@ class AI:
         """
         self.turn = 0
         self.previousChoice = 'X'
-        self.memory = [[self.TileObj] * 1] * 1
+        self.memory = [[self.TileObj]]
         self.xPos = 0
         self.yPos = 0
-        print(self.memory)
+        opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
 
     
 
@@ -61,21 +64,27 @@ class AI:
 
         The same goes for goal hexes (0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
         """
-        
+
+        if (self.memory[xPos][yPos].isVisited() == 0):
+            self.memory[xPos][yPos].setVisited()
 
         numTiles = {'N': 0, "E": 0, "S": 0, 'W': 0, 'X': 999999}
-        opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
-        for direction in percepts:
-            path = percepts.get(direction)
-            for tile in path:
+
+        for direction, path in percepts.items():
+            if direction == 'X':
+                continue
+            if direction == 'N':
                 if direction != opposites[self.previousChoice]:
-                    if tile == 'w':
-                        break
-                    if tile != 'w':
-                        numTiles[direction] += 1
-                    if tile == 'r':
-                        choice = direction
-                        return choice
+                    for tile in path:
+                        self.memory.insert(xPos, [self.TileObj()] * len(self.memory[0]))
+                        self.memory[xPos+1][yPos] = self.TileObj(i)
+                        if tile == 'w':
+                            break
+                        if tile != 'w':
+                            numTiles[direction] += 1
+                        if tile == 'r':
+                            choice = direction
+                            return choice
                     
         shortest = 999
         for direction in percepts:
@@ -89,5 +98,6 @@ class AI:
             choice = 'U'
         self.previousChoice = choice
         print("Picked direction " + choice + " with length " + str(shortest))
+        
         return choice
     
