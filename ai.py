@@ -35,7 +35,9 @@ class AI:
         self.previousChoice = 'X'
         self.memory = [[self.TileObj]]
         self.xPos = 0
+        self.xBound = 0
         self.yPos = 0
+        self.yBound = 0
         opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
 
     
@@ -74,38 +76,61 @@ class AI:
         numTiles = {'N': 0, "E": 0, "S": 0, 'W': 0, 'X': 999999}
 
 
-        #mapping function
+        #mapping function -- complete?
         for direction, path in percepts.items():
             if direction == 'X':
                 continue
+            i = 0
             if direction == 'N':
                 for tile in path:
-                    self.memory[0:-1].insert(0, self.TileObj())
+                    if self.yPos == 0:
+                        self.memory[0:-1].insert(0, self.TileObj())
+                        i += 1
                     self.memory[xPos][0] = self.TileObj(tile)
-                    self.yPos += 1
+                self.yPos += i
             i = 0
             if direction == 'E':
                 for tile in path:
-                    self.memory.append([self.TileObj]*len(self.memory[0]))
+                    if self.memory[xPos+1][yPos] != self.TileObj:
+                        self.memory.append([self.TileObj()]*len(self.memory[0]))
                     self.memory[xPos+i][yPos] = self.TileObj(tile)
                     i += 1
 
+            i = 0
             if direction == 'S':
                 for tile in path:
+                    if self.memory[xPos][yPos+1] != self.TileObj:
+                        self.memory[0:-1].append(self.TileObj())
+                    self.memory[xPos][yPos+i] = self.TileObj(tile)
+                    i+=1
 
-
+            i = 0
             if direction == 'W':
                 for tile in path:
-                    
-        shortest = 999
+                    if self.xPos == 0:
+                        self.memory.insert(0, [self.TileObj()] * len(self.memory[0]))
+                        i += 1
+                    self.memory[0][yPos] = self.TileObj(tile)
+                self.xPos += i
+            i = 0
+        shortestPath = 999
 
-        #choice function -- TODO: refactor to use map memory
+        #choice function -- TODO: implement checking for if entire path is 
+        #visited; if so, disregard path
         for direction in percepts:
-            print(numTiles[direction])
-            if numTiles[direction] > 0:
-                if numTiles[direction] < shortest:                    
-                    choice = direction
-                    shortest = numTiles[direction]
+            if direction == 'X':
+                continue
+            
+            numTilesInPath = 0
+            if direction == 'N':
+                while self.memory[xPos][yPos+i].typeOfTile != 'W':
+                    if self.memory[xPos][yPos+i].typeOfTile == 'r':
+                        choice = direction
+                        return choice
+                    if self.memory[xPos][yPos+i].isVisited():
+                        break
+                    numTiles[direction] += 1
+                    
 
         self.previousChoice = choice
         print("Picked direction " + choice + " with length " + str(shortest))
