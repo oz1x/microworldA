@@ -68,25 +68,38 @@ class AI:
         if (self.memory[xPos][yPos].isVisited() == 0):
             self.memory[xPos][yPos].setVisited()
 
+        if percepts.get('X') == 'r':
+            return 'U'
+
         numTiles = {'N': 0, "E": 0, "S": 0, 'W': 0, 'X': 999999}
 
+
+        #mapping function
         for direction, path in percepts.items():
             if direction == 'X':
                 continue
             if direction == 'N':
-                if direction != opposites[self.previousChoice]:
-                    for tile in path:
-                        self.memory.insert(xPos, [self.TileObj()] * len(self.memory[0]))
-                        self.memory[xPos+1][yPos] = self.TileObj(i)
-                        if tile == 'w':
-                            break
-                        if tile != 'w':
-                            numTiles[direction] += 1
-                        if tile == 'r':
-                            choice = direction
-                            return choice
+                for tile in path:
+                    self.memory[0:-1].insert(0, self.TileObj())
+                    self.memory[xPos][0] = self.TileObj(tile)
+                    self.yPos += 1
+            i = 0
+            if direction == 'E':
+                for tile in path:
+                    self.memory.append([self.TileObj]*len(self.memory[0]))
+                    self.memory[xPos+i][yPos] = self.TileObj(tile)
+                    i += 1
+
+            if direction == 'S':
+                for tile in path:
+
+
+            if direction == 'W':
+                for tile in path:
                     
         shortest = 999
+
+        #choice function -- TODO: refactor to use map memory
         for direction in percepts:
             print(numTiles[direction])
             if numTiles[direction] > 0:
@@ -94,8 +107,6 @@ class AI:
                     choice = direction
                     shortest = numTiles[direction]
 
-        if (percepts.get('X') == 'r'):
-            choice = 'U'
         self.previousChoice = choice
         print("Picked direction " + choice + " with length " + str(shortest))
         
