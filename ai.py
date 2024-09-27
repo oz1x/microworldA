@@ -27,113 +27,189 @@ class AI:
         
     
     def __init__(self):
-        """
-        Called once before the sim starts. You may use this function
-        to initialize any data or data structures you need.
-        """
         self.turn = 0
         self.previousChoice = 'X'
-        self.memory = [[self.TileObj]]
+        self.memory = [[self.TileObj()]]
         self.xPos = 0
         self.xBound = 0
         self.yPos = 0
         self.yBound = 0
-        opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
+        self.backTrackStack = []
+        self.opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
 
     
 
     def update(self, percepts):
-        """
-        PERCEPTS:
-        Called each turn. Parameter "percepts" is a dictionary containing
-        nine entries with the following keys: X, N, NE, E, SE, S, SW, W, NW.
-        Each entry's value is a single character giving the contents of the
-        map cell in that direction. X gives the contents of the cell the agent
-        is in.
 
-        COMAMND:
-        This function must return one of the following commands as a string:
-        N, E, S, W, U
+        print(self.memory[self.xPos][self.yPos])
 
-        N moves the agent north on the map (i.e. up)
-        E moves the agent east
-        S moves the agent south
-        W moves the agent west
-        U uses/activates the contents of the cell if it is useable. For
-        example, stairs (o, b, y, p) will not move the agent automatically
-        to the corresponding hex. The agent must 'U' the cell once in it
-        to be transported.
-
-        The same goes for goal hexes (0, 1, 2, 3, 4, 5, 6, 7, 8, 9).
-        """
-
-        if (self.memory[xPos][yPos].isVisited() == 0):
-            self.memory[xPos][yPos].setVisited()
+        if (self.memory[self.xPos][self.yPos].isVisited() == 0):
+            self.memory[self.xPos][self.yPos].setVisited()
 
         if percepts.get('X') == 'r':
             return 'U'
-
-        numTiles = {'N': 0, "E": 0, "S": 0, 'W': 0, 'X': 999999}
 
 
         #mapping function -- complete?
         for direction, path in percepts.items():
             if direction == 'X':
                 continue
-            i = 0
+            i = 1
             if direction == 'N':
+                atEdge = 0
+                if self.yPos == 0:
+                    atEdge = 1
                 for tile in path:
-                    if self.yPos == 0:
-                        self.memory[0:-1].insert(0, self.TileObj())
-                        i += 1
-                    self.memory[xPos][0] = self.TileObj(tile)
-                self.yPos += i
-            i = 0
+                    if atEdge == 1:
+                        print("Testing List Insert")
+                        print("Before:")
+                        print(self.memory)
+                        for sublist in self.memory:
+                            sublist.insert(0, self.TileObj())
+                        print("After:")
+                        print(self.memory)
+                        self.yPos += 1
+                    self.memory[self.xPos][self.yPos-i] = self.TileObj(tile)
+
+                    i += 1
+            i = 1
             if direction == 'E':
                 for tile in path:
-                    if self.memory[xPos+1][yPos] != self.TileObj:
-                        self.memory.append([self.TileObj()]*len(self.memory[0]))
-                    self.memory[xPos+i][yPos] = self.TileObj(tile)
+                    if self.xPos+i+1 > len(self.memory):
+                        print("creating new column of tiles\n\n\n")
+                        self.memory.append([self.TileObj() for i in range(len(self.memory[0]))])
+                    print(self.memory)
+                    print("\n\n\n" + str(self.xPos), str(self.yPos), str(i) + "\n\n\n")
+                    self.memory[self.xPos+i][self.yPos] = self.TileObj(tile)
                     i += 1
 
-            i = 0
+            i = 1
             if direction == 'S':
                 for tile in path:
-                    if self.memory[xPos][yPos+1] != self.TileObj:
-                        self.memory[0:-1].append(self.TileObj())
-                    self.memory[xPos][yPos+i] = self.TileObj(tile)
+                    if self.yPos+i+1 > len(self.memory[self.xPos]):
+                        for sublist in self.memory:
+                            sublist.append(self.TileObj())
+                    self.memory[self.xPos][self.yPos+i] = self.TileObj(tile)
+                    print(i)
                     i+=1
 
-            i = 0
+            i = 1
             if direction == 'W':
+                atEdge = 0
+                if self.xPos == 0:
+                    atEdge = 1
                 for tile in path:
-                    if self.xPos == 0:
-                        self.memory.insert(0, [self.TileObj()] * len(self.memory[0]))
-                        i += 1
-                    self.memory[0][yPos] = self.TileObj(tile)
-                self.xPos += i
-            i = 0
+                    if atEdge == 1:
+                        self.memory.insert(0, [self.TileObj() for i in range(len(self.memory[0]))])
+                        self.xPos += 1
+                    self.memory[self.xPos-i][self.yPos] = self.TileObj(tile)
+                    i+=1
+                print("finished westward expansion")
+            i = 1
+
         shortestPath = 999
 
         #choice function -- TODO: implement checking for if entire path is 
         #visited; if so, disregard path
         for direction in percepts:
+            print("Entering Choice Function")
             if direction == 'X':
+                print("skipping X")
                 continue
             
             numTilesInPath = 0
             if direction == 'N':
-                while self.memory[xPos][yPos+i].typeOfTile != 'W':
-                    if self.memory[xPos][yPos+i].typeOfTile == 'r':
+                print("Entering N, x = " + str(self.xPos) + ", y = " + str(self.yPos))
+                print(self.memory)
+                while self.memory[self.xPos][self.yPos-i].typeOfTile != 'w':
+                    print(self.memory[self.xPos][self.yPos-i].typeOfTile)
+                    if self.memory[self.xPos][self.yPos-i].typeOfTile == 'r':
                         choice = direction
                         return choice
-                    if self.memory[xPos][yPos+i].isVisited():
-                        break
-                    numTiles[direction] += 1
-                    
+                    if self.memory[self.xPos][self.yPos-i].isVisited() == 0:
+                        numTilesInPath += 1
+                    i += 1
+
+                if numTilesInPath < shortestPath and numTilesInPath > 0:
+                    shortestPath = numTilesInPath
+                    choice = direction
+
+            i = 1
+            numTilesInPath = 0
+            if direction == 'E':
+                print("She E on my E til I E")
+                while self.memory[self.xPos+i][self.yPos].typeOfTile != 'w':
+                    if self.memory[self.xPos+i][self.yPos].typeOfTile == 'r':
+                        choice = direction
+                        return choice
+                    if self.memory[self.xPos+i][self.yPos].isVisited() == 0:
+                        numTilesInPath += 1
+                    i += 1
+
+                if numTilesInPath < shortestPath and numTilesInPath > 0:
+                    shortestPath = numTilesInPath
+                    choice = direction
+
+            i = 1
+            numTilesInPath = 0
+            if direction == 'S':
+                while self.memory[self.xPos][self.yPos+i].typeOfTile != 'w':
+                    if self.memory[self.xPos][self.yPos+i].typeOfTile == 'r':
+                        choice = direction
+                        return choice
+                    if self.memory[self.xPos][self.yPos+i].isVisited() == 0:
+                        numTilesInPath += 1
+                    i += 1
+
+                if numTilesInPath < shortestPath and numTilesInPath > 0:
+                    shortestPath = numTilesInPath
+                    choice = direction
+            
+            i = 1
+            numTilesInPath = 0
+            if direction == 'W':
+                while self.memory[self.xPos-i][self.yPos].typeOfTile != 'w':
+                    if self.memory[self.xPos-i][self.yPos].typeOfTile == 'r':
+                        choice = direction
+                        return choice
+                    if self.memory[self.xPos-i][self.yPos].isVisited() == 0:
+                        numTilesInPath += 1
+                    i += 1
+
+                if numTilesInPath < shortestPath and numTilesInPath > 0:
+                    shortestPath = numTilesInPath
+                    choice = direction
+                
+        for direction in percepts:
+
+            if direction == 'X':
+                continue
+
+            if direction == 'N':
+                if choice == direction:
+                    print("YAHOO" + direction)
+                    self.yPos -= 1
+
+            if direction == 'E':
+                if choice == direction:
+                    print("YAHOO" + direction)
+                    self.xPos += 1
+
+            if direction == 'S':
+                if choice == direction:
+                    print("YAHOO" + direction)
+                    self.yPos += 1
+
+            if direction == 'W':
+                if choice == direction:
+                    print("YAHOO" + direction)
+                    self.xPos -= 1
+
+        if choice == self.previousChoice:
+            self.backTrackStack.append(choice)
 
         self.previousChoice = choice
-        print("Picked direction " + choice + " with length " + str(shortest))
+        print("Picked direction " + choice + " with length " + str(shortestPath))
         
         return choice
     
