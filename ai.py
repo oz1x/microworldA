@@ -92,20 +92,21 @@ class AI:
             if key == 'N':
                 for i in values:
                     self.memory[0:-1].insert(0, self.TileObj())
-                    self.memory[xPos][0] = self.TileObj(i)
+                    self.memory[self.xPos][0] = self.TileObj(i)
                     self.yPos += 1
             if key == 'E':
                 for i in values:
-                    self.memory.insert(xPos, [self.TileObj()]*len(self.memory[0]))
-                    self.memory[xPos][yPos+1] = self.TileObj(i)
+                    self.memory.insert(self.xPos, [self.TileObj()]*len(self.memory[0]))
+                    
+                    self.memory[self.xPos][self.yPos] = self.TileObj(i)
             if key == 'S':
                 for i in values:
-                    self.memory[0:-1].insert(yPos, self.TileObj)
-                    self.memory[xPost+1][yPos] = self.TileObj(i)
+                    self.memory[0:-1].insert(self.yPos, self.TileObj)
+                    self.memory[self.xPos+1][self.yPos] = self.TileObj(i)
             if key == 'W':
                 for i in values:
                     self.memory.insert(0, [self.TileObj()]*len(self.memory[0]))
-                    self.memory[0][yPos] = self.TileObj(i)
+                    self.memory[0][self.yPos] = self.TileObj(i)
                     self.xPos += 1
                 
 
