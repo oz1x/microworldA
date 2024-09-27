@@ -48,8 +48,9 @@ class AI:
             print("setting ")
             self.memory[self.xPos][self.yPos].setVisited()
 
-        if percepts.get('X') == 'r':
-            return 'U'
+        if percepts.get('X')[0] == 'r':
+            print("USING GOAL!!!!")
+            return 'R'
 
 
         #mapping function -- complete?
@@ -196,6 +197,15 @@ class AI:
 
         if choice == 'x':
             choice = self.opposites[self.backTrackStack.pop()]
+            if choice == 'N':
+                self.yPos -= 1
+            if choice == 'E':
+                self.xPos += 1
+            if choice == 'S':
+                self.yPos += 1
+            if choice == 'W':
+                self.xPos -= 1
+
             return choice
         
         self.backTrackStack.append(choice)
