@@ -45,12 +45,10 @@ class AI:
         print(self.memory[self.xPos][self.yPos])
 
         if (self.memory[self.xPos][self.yPos].isVisited() == 0):
-            print("setting ")
             self.memory[self.xPos][self.yPos].setVisited()
 
         if percepts.get('X')[0] == 'r':
-            print("USING GOAL!!!!")
-            return 'R'
+            return 'U'
 
 
         #mapping function -- complete?
@@ -90,31 +88,29 @@ class AI:
             i = 1
             if direction == 'W':
                 atEdge = 0
-                if self.xPos == 0:
-                    atEdge = 1
+                tilesOut = 0
                 for tile in path:
+                    if self.xPos - tilesOut == 0:
+                        atEdge = 1
                     if atEdge == 1:
                         self.memory.insert(0, [self.TileObj() for i in range(len(self.memory[0]))])
                         self.xPos += 1
                     self.memory[self.xPos-i][self.yPos].typeOfTile = tile
                     i+=1
-                print("finished westward expansion")
+                    tilesOut+=1
             i = 1
 
         shortestPath = 999
 
-        #choice function -- TODO: implement checking for if entire path is 
-        #visited; if so, disregard path
+        #choice function
         choice = 'x'
         for direction in percepts:
-            print("Entering Choice Function")
             if direction == 'X':
                 choice = 'x'
                 continue
             
             numTilesInPath = 0
             if direction == 'N':
-                print("Entering N, x = " + str(self.xPos) + ", y = " + str(self.yPos))
                 while self.memory[self.xPos][self.yPos-i].typeOfTile != 'w':
                     if self.memory[self.xPos][self.yPos-i].typeOfTile == 'r':
                         choice = direction
@@ -154,7 +150,6 @@ class AI:
                     i += 1
 
                 if numTilesInPath < shortestPath and numTilesInPath > 0:
-                    print("# untouched tiles in path: " + str(numTilesInPath))
                     shortestPath = numTilesInPath
                     choice = direction
             
@@ -212,7 +207,6 @@ class AI:
 
 
         self.previousChoice = choice
-        print("Picked direction " + choice + " with length " + str(shortestPath))
         
         return choice
     
