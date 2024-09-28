@@ -1,18 +1,22 @@
 # NAME(S): Dylan Andrews, Ozwin Cordes
 #
-# APPROACH: [WRITE AN OVERVIEW OF YOUR APPROACH HERE.]
-#     Please use multiple lines (< ~80-100 char) for you approach write-up.
-#     Keep it readable. In other words, don't write
-#     the whole damned thing on one super long line.
-#
-#     In-code comments DO NOT count as a description of
-#     of your approach.
-
+# APPROACH: The agent begins by initializing various variables that are used to map out its memory of the maze. 
+#     There is also a stack that is used for the agent to back track in the event of it getting stuck in a loop.
+#     It records every move that the agent makes but will pop an entry everytime it needs to back track.
+#     Every update the agent will look around its surroundings and update the memory array.
+#     It will also record what tile it has been on. 
+#     This is done using the TileObj class that represents one tile in the world.
+#     The agent will then decide what path to take. 
+#     It will find the shortest path that doesn't have a tile that was visited. 
+#     If the agent gets into a situation where there is not path around it that has not been visited,
+#     it will begin popping from the stack and going the opposite of what direction it originally went.
+#     The agent will also immediately go towards the goal if it is in the agent's vision.
 import random
 
 
 class AI:
 
+    # Class that represents one tile in the world
     class TileObj:
 
         def __init__(self, tileType='w'):
@@ -36,6 +40,7 @@ class AI:
         self.yBound = 0
         self.backTrackStack = []
         self.flagNoNewTiles = 0
+        # Dictionary used to quickly reverse direction
         self.opposites = {'N': 'S', 'S': 'N', 'E': 'W', 'W':'E', 'X': 'Y'}
 
     
